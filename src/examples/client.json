@@ -1,0 +1,34 @@
+{
+  "server": "burrow.example.com:7835",
+  "name": "laptop-01",
+  "secret": "change-me-long-random-secret",
+  "allow": [
+    "10.0.0.0/8:22",
+    "192.168.1.0/24:8000-8100"
+  ],
+  "allow_all": false,
+  "insecure_plaintext": false,
+  "headers": {
+    "X-Access-Token": "change-me-proxy-token"
+  },
+  "cipher": "chachapoly",
+  "reconnect": {
+    "initial_delay_ms": 250,
+    "max_delay_secs": 30,
+    "give_up_after_secs": 0,
+    "on_rejected": "retry"
+  },
+  "connect_timeout_secs": 10,
+  "max_connections": 16384,
+  "max_udp_peers": 8192,
+  "tcp": {
+    "nodelay": true,
+    "keepalive_secs": 30
+  },
+  "udp": {
+    "session_timeout_secs": 120
+  },
+  "update": {
+    "remote": false
+  }
+}

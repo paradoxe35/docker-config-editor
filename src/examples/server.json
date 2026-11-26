@@ -1,0 +1,77 @@
+{
+  "listen": "0.0.0.0:7835",
+  "public_address": "tunnel.example.com",
+  "web": {
+    "https": 443,
+    "http": 80,
+    "hsts": true,
+    "compress": true,
+    "max_body_size": "100MB",
+    "rate_limit": 20,
+    "letsencrypt": {
+      "email": "ops@example.com"
+    }
+  },
+  "clients": {
+    "office-box": {
+      "secret": "change-me-long-random-secret",
+      "max_connections": 64
+    },
+    "lab-box": {
+      "secret": "change-me-another-long-random-secret"
+    }
+  },
+  "visitors": {
+    "alice": {
+      "secret": "change-me-visitor-long-random-secret",
+      "reach": {
+        "office-box": "any"
+      },
+      "max_connections": 20,
+      "admin": "read",
+      "admin_from": [
+        "203.0.113.0/24"
+      ]
+    }
+  },
+  "services": {
+    "web-app": {
+      "client": "office-box",
+      "target": "127.0.0.1:3000",
+      "web": "app.example.com",
+      "health_check": {
+        "path": "/healthz"
+      }
+    },
+    "game": {
+      "clients": [
+        {
+          "name": "office-box",
+          "weight": 3
+        },
+        "lab-box"
+      ],
+      "mode": "failover",
+      "target": "127.0.0.1:25565",
+      "bind": 30000,
+      "protocol": "tcp",
+      "bandwidth": "40mbit"
+    },
+    "lab-ssh": {
+      "client": "lab-box",
+      "target": "10.0.0.5:22",
+      "visitors": [
+        "alice"
+      ],
+      "allow_from": [
+        "203.0.113.0/24"
+      ]
+    }
+  },
+  "heartbeat": {
+    "interval_secs": 10
+  },
+  "metrics": {
+    "listen": "127.0.0.1:9100"
+  }
+}

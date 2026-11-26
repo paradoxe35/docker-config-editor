@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "burrow visitor config",
+  "type": "object",
+  "properties": {
+    "server": {
+      "description": "Server address: host or host:port for TCP (port 7835 when omitted), or ws://host/path or wss://host/path",
+      "type": "string"
+    },
+    "name": {
+      "description": "This visitor's name, as defined under visitors in the server config",
+      "type": "string"
+    },
+    "secret": {
+      "description": "256-bit secret (base64 or hex) shared with the server",
+      "type": "string"
+    },
+    "forwards": {
+      "description": "Local ports that lead to private services or client targets, keyed by forward name",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/ForwardEntry"
+      },
+      "default": {}
+    },
+    "headers": {
+      "description": "Extra HTTP headers for the WebSocket upgrade, for example an access token for a proxy",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "ca": {
+      "description": "CA certificate, or the server certificate itself (pinned), to trust for wss://; relative to the config file",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cipher": {
+      "$ref": "#/$defs/Cipher"
+    },
+    "proxy": {
+      "description": "Connect through a proxy: http://host:port or socks5://[user:pass@]host:port",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "connect_timeout_secs": {
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 1,
+      "maximum": 300
+    },
+    "tcp": {
+      "$ref": "#/$defs/TcpOptions"
+    },
+    "udp": {
+      "description": "UDP forwards: how long a local UDP peer is kept without traffic, and how many peers each forward port keeps",
+      "$ref": "#/$defs/VisitorUdpOptions"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "server",
+    "name",
+    "secret"
+  ],
+  "$defs": {
+    "ForwardEntry": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "description": "Private service on the server to reach",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client": {
+          "description": "Client to reach directly, with target; needs reach for this visitor in the server config",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target": {
+          "description": "host:port as seen from the client, or a port alone for 127.0.0.1 on the client",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "socks": {
+          "description": "With client: listen as a SOCKS5 proxy, so each connection names its own target on that client",
+          "type": "boolean"
+        },
+        "protocol": {
+          "description": "tcp or udp; must match the service's protocol on the server, and reach covers both",
+          "$ref": "#/$defs/Protocol"
+        },
+        "local": {
+          "description": "Where to listen on this machine: a port alone for 127.0.0.1, or ip:port",
+          "$ref": "#/$defs/Bind"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "local"
+      ]
+    },
+    "Target": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "format": "uint16",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "Protocol": {
+      "type": "string",
+      "enum": [
+        "tcp",
+        "udp"
+      ]
+    },
+    "Bind": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "format": "uint16",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "Cipher": {
+      "type": "string",
+      "enum": [
+        "chachapoly",
+        "aes-gcm"
+      ]
+    },
+    "TcpOptions": {
+      "type": "object",
+      "properties": {
+        "nodelay": {
+          "type": "boolean",
+          "default": true
+        },
+        "keepalive_secs": {
+          "description": "TCP keepalive idle time, 0 disables",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0,
+          "maximum": 32767,
+          "default": 30
+        }
+      },
+      "additionalProperties": false
+    },
+    "VisitorUdpOptions": {
+      "type": "object",
+      "properties": {
+        "session_timeout_secs": {
+          "description": "A local UDP peer of a UDP forward that sends and gets nothing for this long is forgotten",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1,
+          "default": 120
+        },
+        "max_peers": {
+          "description": "Most UDP peers each port of a UDP forward keeps at once; a datagram from a new peer beyond it is dropped",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 1,
+          "maximum": 1000000,
+          "default": 4096
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

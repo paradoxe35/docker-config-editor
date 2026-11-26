@@ -1,0 +1,30 @@
+{
+  "server": "burrow.example.com:7835",
+  "name": "laptop",
+  "secret": "change-me-long-random-secret",
+  "forwards": {
+    "ssh": {
+      "service": "homelab-ssh",
+      "protocol": "tcp",
+      "local": "127.0.0.1:2222"
+    },
+    "grafana": {
+      "service": "grafana",
+      "protocol": "tcp",
+      "local": 3000
+    }
+  },
+  "headers": {
+    "x-access-token": "change-me-proxy-token"
+  },
+  "cipher": "chachapoly",
+  "connect_timeout_secs": 10,
+  "tcp": {
+    "nodelay": true,
+    "keepalive_secs": 30
+  },
+  "udp": {
+    "session_timeout_secs": 120,
+    "max_peers": 4096
+  }
+}
